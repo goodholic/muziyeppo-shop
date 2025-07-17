@@ -1,0 +1,135 @@
+/* ===== assets/style.css ===== */
+/* 무지예뽀 쇼핑몰 스타일시트 */
+
+:root {
+    --muziyeppo-primary: #000000;
+    --muziyeppo-secondary: #333333;
+    --muziyeppo-accent: #ff0000;
+    --muziyeppo-border: #e0e0e0;
+    --muziyeppo-bg: #f8f8f8;
+    --muziyeppo-text: #333333;
+    --muziyeppo-text-light: #666666;
+}
+
+/* 공통 스타일 */
+.muziyeppo-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* 상품 카드 애니메이션 */
+.muziyeppo-product-card {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 버튼 스타일 */
+.muziyeppo-btn {
+    font-family: inherit;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.muziyeppo-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.muziyeppo-btn:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* 찜 버튼 애니메이션 */
+.muziyeppo-wishlist-btn svg {
+    transition: all 0.3s ease;
+}
+
+.muziyeppo-wishlist-btn.active svg {
+    animation: heartBeat 0.5s ease;
+}
+
+@keyframes heartBeat {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.3); }
+    50% { transform: scale(1); }
+    75% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+}
+
+/* 로딩 스피너 */
+.muziyeppo-loading {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid var(--muziyeppo-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 토스트 메시지 */
+.muziyeppo-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--muziyeppo-primary);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 24px;
+    font-size: 14px;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 9999;
+}
+
+.muziyeppo-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .muziyeppo-product-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+    
+    .muziyeppo-product-info {
+        padding: 8px !important;
+    }
+    
+    .muziyeppo-product-name {
+        font-size: 13px !important;
+    }
+    
+    .muziyeppo-price {
+        font-size: 14px !important;
+    }
+}
