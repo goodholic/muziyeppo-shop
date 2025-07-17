@@ -1,0 +1,3125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-signin-client_id" content="382989724031-1koco239agq35vcv7gfj8crr2kth8hin.apps.googleusercontent.com">
+    <title>PomPom - 모든 쇼핑몰을 한곳에서</title>
+    
+    <!-- Google Sign-In 라이브러리 -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f9fafb;
+            color: #333;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+        
+        /* 스크롤바 숨기기 */
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        
+        /* 헤더 스타일 */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background-color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .header.scrolled {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .top-banner {
+            background: linear-gradient(to right, #86efac, #6ee7b7);
+            color: white;
+            text-align: center;
+            padding: 8px;
+            font-size: 14px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        .main-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+        }
+        
+        .logo {
+            font-weight: bold;
+            font-size: 20px;
+            background: linear-gradient(to right, #10b981, #34d399);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            cursor: pointer;
+        }
+        
+        .header-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .icon-button {
+            padding: 8px;
+            border-radius: 50%;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            position: relative;
+        }
+        
+        .icon-button:hover {
+            background-color: #d1fae5;
+        }
+        
+        .notification-dot {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 8px;
+            height: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+        }
+        
+        /* 검색 바 */
+        .search-bar {
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            max-height: 0;
+        }
+        
+        .search-bar.show {
+            max-height: 80px;
+        }
+        
+        .search-input {
+            width: 100%;
+            background: linear-gradient(to right, #ecfdf5, #d1fae5);
+            border-radius: 9999px;
+            padding: 10px 40px 10px 16px;
+            border: 1px solid #86efac;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .search-input:focus {
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+            border-color: #10b981;
+        }
+        
+        /* 배너 */
+        .banner {
+            background: linear-gradient(to right, #10b981, #34d399);
+            color: white;
+            padding: 12px 16px;
+            text-align: center;
+        }
+        
+        .banner h1 {
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        /* 광고 슬라이더 */
+        .ad-slider {
+            position: relative;
+            background: linear-gradient(to bottom right, #ecfdf5, #d1fae5);
+            overflow: hidden;
+            height: 192px;
+        }
+        
+        .ad-container {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+            height: 100%;
+        }
+        
+        .ad-item {
+            width: 100%;
+            flex-shrink: 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(to right, #86efac, #6ee7b7);
+        }
+        
+        .ad-overlay {
+            position: absolute;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        .ad-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            color: white;
+            padding: 0 16px;
+        }
+        
+        .ad-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .ad-subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .ad-indicators {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+        }
+        
+        .ad-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .ad-indicator.active {
+            background-color: white;
+            width: 24px;
+            border-radius: 4px;
+        }
+        
+        /* 카테고리 탭 */
+        .category-tabs {
+            background-color: white;
+            position: sticky;
+            top: 68px;
+            z-index: 40;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .category-list {
+            display: flex;
+            gap: 16px;
+            padding: 12px 16px;
+            overflow-x: auto;
+        }
+        
+        .category-button {
+            white-space: nowrap;
+            padding-bottom: 4px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .category-button:hover {
+            color: #1f2937;
+        }
+        
+        .category-button.active {
+            color: #10b981;
+            font-weight: bold;
+            border-bottom: 2px solid #10b981;
+        }
+        
+        .chevron-icon {
+            width: 12px;
+            height: 12px;
+            transition: transform 0.3s;
+        }
+        
+        .chevron-icon.rotated {
+            transform: rotate(180deg);
+        }
+        
+        /* 서브 카테고리 */
+        .sub-categories {
+            background: linear-gradient(to right, #ecfdf5, #d1fae5);
+            padding: 12px 16px;
+            border-top: 1px solid #86efac;
+            display: none;
+        }
+        
+        .sub-categories.show {
+            display: block;
+        }
+        
+        .sub-category-list {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+        }
+        
+        .sub-category-button {
+            padding: 6px 16px;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            white-space: nowrap;
+            border: none;
+            cursor: pointer;
+            background-color: white;
+            color: #374151;
+        }
+        
+        .sub-category-button:hover {
+            background-color: #d1fae5;
+        }
+        
+        .sub-category-button.active {
+            background: linear-gradient(to right, #10b981, #34d399);
+            color: white;
+        }
+        
+        /* 퀵 필터 */
+        .quick-filter {
+            background: linear-gradient(to bottom, #ecfdf5, white);
+            padding: 16px;
+        }
+        
+        .filter-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        
+        .filter-title {
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #047857;
+        }
+        
+        .filter-toggle {
+            font-size: 14px;
+            color: #10b981;
+            font-weight: 500;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .filter-toggle:hover {
+            color: #059669;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-button {
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            cursor: pointer;
+            background-color: white;
+            color: #374151;
+            border: 1px solid #86efac;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        
+        .filter-button:hover {
+            background-color: #d1fae5;
+        }
+        
+        .filter-button.active {
+            background: linear-gradient(to right, #10b981, #34d399);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-color: transparent;
+        }
+        
+        /* 쇼핑몰 그리드 */
+        .shops-section {
+            background-color: white;
+            padding: 16px;
+        }
+        
+        .shops-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        
+        .shops-title {
+            font-weight: bold;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #047857;
+        }
+        
+        .update-time {
+            font-size: 14px;
+            color: #10b981;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .shops-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        
+        .shop-card {
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #86efac;
+        }
+        
+        .shop-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .shop-image-container {
+            position: relative;
+            aspect-ratio: 3/2;
+            overflow: hidden;
+        }
+        
+        .shop-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+        
+        .shop-card:hover .shop-image {
+            transform: scale(1.05);
+        }
+        
+        .shop-labels {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .label-new {
+            background: linear-gradient(to right, #10b981, #34d399);
+            color: white;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .label-category {
+            background-color: rgba(5, 150, 105, 0.8);
+            color: white;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+        
+        .like-button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 8px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .like-button:hover {
+            background-color: white;
+        }
+        
+        .heart-icon {
+            width: 16px;
+            height: 16px;
+            color: #6b7280;
+        }
+        
+        .heart-icon.liked {
+            color: #10b981;
+            fill: #10b981;
+        }
+        
+        .external-link-icon {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 6px;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .external-link-icon svg {
+            width: 12px;
+            height: 12px;
+            color: #10b981;
+        }
+        
+        .shop-info {
+            padding: 12px;
+        }
+        
+        .shop-name {
+            font-weight: bold;
+            font-size: 16px;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+        
+        .shop-description {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .shop-stats {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .shop-rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .star-icon {
+            width: 12px;
+            height: 12px;
+            fill: #fbbf24;
+            color: #fbbf24;
+        }
+        
+        .shop-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 8px;
+        }
+        
+        .shop-tag {
+            font-size: 12px;
+            background-color: #d1fae5;
+            color: #047857;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-weight: 500;
+        }
+        
+        /* 로딩 인디케이터 */
+        .loading {
+            display: flex;
+            justify-content: center;
+            padding: 16px;
+        }
+        
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 4px solid #10b981;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 맨 위로 버튼 */
+        .scroll-top {
+            position: fixed;
+            bottom: 96px;
+            right: 16px;
+            background: linear-gradient(to right, #10b981, #34d399);
+            color: white;
+            padding: 12px;
+            border-radius: 50%;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            transform: scale(0);
+            opacity: 0;
+        }
+        
+        .scroll-top.show {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        .scroll-top:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 하단 네비게이션 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border-top: 1px solid #86efac;
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+        }
+        
+        .nav-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 12px 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.3s;
+            color: #9ca3af;
+            position: relative;
+        }
+        
+        .nav-button:hover {
+            color: #34d399;
+        }
+        
+        .nav-button.active {
+            color: #10b981;
+        }
+        
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .nav-label {
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .nav-badge {
+            position: absolute;
+            top: 4px;
+            right: 25%;
+            width: 16px;
+            height: 16px;
+            background-color: #10b981;
+            color: white;
+            border-radius: 50%;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 페이지 스타일 */
+        .page {
+            display: none;
+            min-height: calc(100vh - 80px);
+            background: linear-gradient(to bottom, #ecfdf5, white);
+            padding: 16px;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .page-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 16px;
+            color: #047857;
+        }
+        
+        /* 카테고리 페이지 */
+        .category-item {
+            background-color: white;
+            border: 1px solid #86efac;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+        }
+        
+        .category-item:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .category-item h3 {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #10b981;
+        }
+        
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        
+        .category-sub-button {
+            font-size: 14px;
+            background: linear-gradient(to right, #ecfdf5, #d1fae5);
+            border-radius: 8px;
+            padding: 8px 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            color: #047857;
+        }
+        
+        .category-sub-button:hover {
+            background: linear-gradient(to right, #d1fae5, #a7f3d0);
+            color: #065f46;
+        }
+        
+        /* 검색 페이지 */
+        .search-page-input {
+            width: 100%;
+            background-color: white;
+            border: 1px solid #86efac;
+            border-radius: 9999px;
+            padding: 12px 48px 12px 16px;
+            font-size: 16px;
+            outline: none;
+            margin-bottom: 16px;
+        }
+        
+        .search-page-input:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+        
+        .popular-keywords {
+            margin-bottom: 24px;
+        }
+        
+        .popular-keywords h3 {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #047857;
+        }
+        
+        .keyword-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .keyword-button {
+            background-color: white;
+            border: 1px solid #34d399;
+            border-radius: 9999px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            color: #10b981;
+        }
+        
+        .keyword-button:hover {
+            background-color: #d1fae5;
+            border-color: #10b981;
+        }
+        
+        /* 검색 결과 섹션 추가 */
+        .search-results-section {
+            margin-top: 24px;
+        }
+        
+        .search-results-header {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: #047857;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px 0;
+            color: #6b7280;
+        }
+        
+        .search-loading {
+            text-align: center;
+            padding: 40px 0;
+        }
+        
+        /* 찜 페이지 */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 0;
+        }
+        
+        .empty-icon {
+            width: 64px;
+            height: 64px;
+            color: #86efac;
+            margin-bottom: 16px;
+        }
+        
+        .empty-text {
+            color: #6b7280;
+            margin-bottom: 16px;
+        }
+        
+        .primary-button {
+            background: linear-gradient(to right, #10b981, #34d399);
+            color: white;
+            padding: 8px 24px;
+            border-radius: 9999px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .primary-button:hover {
+            background: linear-gradient(to right, #059669, #10b981);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 마이페이지 */
+        .profile-card {
+            background: linear-gradient(to right, #d1fae5, #a7f3d0);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .profile-avatar {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(to right, #10b981, #34d399);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            font-size: 32px;
+            overflow: hidden;
+        }
+        
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .profile-name {
+            font-weight: bold;
+            color: #065f46;
+        }
+        
+        .profile-level {
+            font-size: 14px;
+            color: #10b981;
+        }
+        
+        .menu-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .menu-button {
+            width: 100%;
+            background-color: white;
+            border: 1px solid #86efac;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            color: #1f2937;
+        }
+        
+        .menu-button:hover {
+            background-color: #ecfdf5;
+        }
+        
+        .menu-button.primary {
+            background: linear-gradient(to right, #10b981, #34d399);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+        
+        .menu-button.primary:hover {
+            background: linear-gradient(to right, #059669, #10b981);
+        }
+        
+        .menu-icon {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .chevron-right {
+            width: 16px;
+            height: 16px;
+            color: #10b981;
+        }
+        
+        .menu-button.primary .chevron-right {
+            color: white;
+        }
+        
+        /* 알림 페이지 */
+        .notification-header {
+            position: sticky;
+            top: 0;
+            background-color: white;
+            border-bottom: 1px solid #e5e7eb;
+            z-index: 40;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .back-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+        }
+        
+        .notification-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        
+        .notification-item.unread {
+            background: linear-gradient(to right, #ecfdf5, #d1fae5);
+            border-color: #86efac;
+        }
+        
+        .notification-item:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .notification-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+        }
+        
+        .notification-text h3 {
+            font-weight: 500;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+        
+        .notification-text p {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+        
+        .notification-date {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+        
+        .unread-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        
+        /* 쇼핑몰 등록 페이지 */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #047857;
+        }
+        
+        .form-input {
+            width: 100%;
+            border: 1px solid #86efac;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+        
+        .form-input:disabled {
+            background-color: #f3f4f6;
+            cursor: not-allowed;
+        }
+        
+        .form-textarea {
+            width: 100%;
+            border: 1px solid #86efac;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+            min-height: 96px;
+            resize: vertical;
+        }
+        
+        .form-select {
+            width: 100%;
+            border: 1px solid #86efac;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+            background-color: white;
+            cursor: pointer;
+        }
+        
+        .form-help {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        .error-message {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: start;
+            gap: 8px;
+        }
+        
+        .error-icon {
+            width: 20px;
+            height: 20px;
+            color: #ef4444;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        
+        .error-content h4 {
+            font-weight: 500;
+            color: #991b1b;
+            margin-bottom: 4px;
+        }
+        
+        .error-content p {
+            font-size: 14px;
+            color: #dc2626;
+        }
+        
+        .submit-button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-top: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .submit-button:not(:disabled) {
+            background: linear-gradient(to right, #10b981, #34d399);
+            color: white;
+        }
+        
+        .submit-button:not(:disabled):hover {
+            background: linear-gradient(to right, #059669, #10b981);
+        }
+        
+        .submit-button:disabled {
+            background-color: #d1d5db;
+            color: #6b7280;
+            cursor: not-allowed;
+        }
+        
+        /* 모달 */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background-color: white;
+            width: 100%;
+            height: 100%;
+            max-width: 1200px;
+            max-height: 90vh;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-header {
+            background: linear-gradient(to right, #10b981, #34d399);
+            color: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .modal-header-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .modal-back-button {
+            background-color: white;
+            color: #10b981;
+            padding: 8px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .modal-back-button:hover {
+            background-color: #d1fae5;
+        }
+        
+        .modal-title h3 {
+            font-weight: bold;
+        }
+        
+        .modal-url {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .modal-close {
+            color: white;
+            background: none;
+            border: none;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .modal-close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .modal-body {
+            flex: 1;
+            position: relative;
+        }
+        
+        .modal-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .modal-return-button {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            background: linear-gradient(to right, #10b981, #34d399);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 9999px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 101;
+            font-weight: 500;
+        }
+        
+        .modal-return-button:hover {
+            background: linear-gradient(to right, #059669, #10b981);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 숨김 클래스 */
+        .hidden {
+            display: none;
+        }
+        
+        /* 아이콘 스타일 */
+        svg {
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        /* 로그인 관련 스타일 추가 */
+        .login-section {
+            text-align: center;
+            padding: 24px;
+            background: linear-gradient(to bottom, #ecfdf5, white);
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .login-section h2 {
+            font-size: 24px;
+            font-weight: bold;
+            color: #047857;
+            margin-bottom: 16px;
+        }
+        
+        .login-section p {
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+        
+        .google-login-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background-color: white;
+            border: 1px solid #dadce0;
+            border-radius: 24px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #3c4043;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        
+        .google-login-button:hover {
+            background-color: #f8f9fa;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .google-icon {
+            width: 20px;
+            height: 20px;
+        }
+        
+        /* 로그아웃 버튼 */
+        .logout-button {
+            background-color: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        
+        .logout-button:hover {
+            background-color: #fee2e2;
+        }
+        
+        /* 구글 로그인 프롬프트 컨테이너 */
+        #g_id_onload {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+
+        /* 구글 로그인 에러 메시지 스타일 */
+        .google-login-error {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            color: #991b1b;
+            font-size: 14px;
+        }
+
+        /* 디버그 정보 스타일 */
+        .debug-info {
+            position: fixed;
+            bottom: 100px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            max-width: 300px;
+            z-index: 9999;
+            display: none;
+        }
+
+        .debug-info.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- 디버그 정보 (개발용) -->
+    <div class="debug-info" id="debugInfo"></div>
+
+    <!-- Google One Tap 프롬프트 -->
+    <div id="g_id_onload"
+         data-client_id="382989724031-1koco239agq35vcv7gfj8crr2kth8hin.apps.googleusercontent.com"
+         data-callback="handleCredentialResponse"
+         data-auto_prompt="false">
+    </div>
+    
+    <!-- 헤더 -->
+    <header class="header" id="header">
+        <!-- 상단 알림 바 -->
+        <div class="top-banner" id="topBanner">
+            🎁 새로운 쇼핑몰을 등록하고 포인트를 받으세요!
+        </div>
+        
+        <!-- 메인 헤더 -->
+        <div class="main-header">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span class="logo" onclick="showPage('home')">PomPom</span>
+                <svg class="sparkles-icon" style="width: 16px; height: 16px; color: #34d399; animation: pulse 2s infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                </svg>
+            </div>
+            <div class="header-buttons">
+                <button class="icon-button" onclick="toggleSearch()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                </button>
+                <button class="icon-button" onclick="showPage('notifications')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <span class="notification-dot" id="notificationDot"></span>
+                </button>
+                <button class="icon-button" onclick="showAddShopPage()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- 검색 바 -->
+        <div class="search-bar" id="searchBar">
+            <div style="padding: 0 16px 12px;">
+                <div style="position: relative;">
+                    <input type="text" class="search-input" id="headerSearchInput" placeholder="✨ 쇼핑몰 이름으로 검색" onkeypress="handleHeaderSearchKeyPress(event)">
+                    <svg style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #10b981; cursor: pointer;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" onclick="performHeaderSearch()">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 홈 페이지 -->
+    <div class="page active" id="homePage">
+        <!-- 로그인 섹션 (로그인 안된 경우에만 표시) -->
+        <div class="login-section" id="loginSection" style="display: none;">
+            <h2>🎉 PomPom에 오신 것을 환영합니다!</h2>
+            <p>구글 계정으로 간편하게 시작하세요</p>
+            <button class="google-login-button" onclick="signInWithGoogle()">
+                <svg class="google-icon" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    <path fill="none" d="M1 1h22v22H1z"/>
+                </svg>
+                구글로 계속하기
+            </button>
+            <div id="googleLoginError" class="google-login-error" style="display: none;"></div>
+        </div>
+
+        <!-- 축소된 배너 -->
+        <div class="banner">
+            <h1>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                </svg>
+                모든 쇼핑몰을 한곳에서!
+            </h1>
+        </div>
+
+        <!-- 광고 슬라이더 -->
+        <div class="ad-slider">
+            <div class="ad-container" id="adContainer">
+                <div class="ad-item">
+                    <div class="ad-overlay"></div>
+                    <div class="ad-content">
+                        <h2 class="ad-title">여름 시즌 특별 SALE</h2>
+                        <p class="ad-subtitle">최대 70% 할인 이벤트</p>
+                    </div>
+                </div>
+                <div class="ad-item">
+                    <div class="ad-overlay"></div>
+                    <div class="ad-content">
+                        <h2 class="ad-title">신규 회원 혜택</h2>
+                        <p class="ad-subtitle">첫 구매 시 20% 추가 할인</p>
+                    </div>
+                </div>
+                <div class="ad-item">
+                    <div class="ad-overlay"></div>
+                    <div class="ad-content">
+                        <h2 class="ad-title">베스트 쇼핑몰 TOP 10</h2>
+                        <p class="ad-subtitle">이번 달 가장 인기있는 쇼핑몰</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 광고 인디케이터 -->
+            <div class="ad-indicators">
+                <button class="ad-indicator active" onclick="setAdIndex(0)"></button>
+                <button class="ad-indicator" onclick="setAdIndex(1)"></button>
+                <button class="ad-indicator" onclick="setAdIndex(2)"></button>
+            </div>
+        </div>
+
+        <!-- 카테고리 탭 -->
+        <div class="category-tabs">
+            <div class="category-list scrollbar-hide">
+                <button class="category-button active" onclick="selectMainCategory('전체')">전체</button>
+                <button class="category-button" onclick="selectMainCategory('의류')">
+                    의류
+                    <svg class="chevron-icon" id="chevron-의류" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </button>
+                <button class="category-button" onclick="selectMainCategory('주얼리')">
+                    주얼리
+                    <svg class="chevron-icon" id="chevron-주얼리" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </button>
+                <button class="category-button" onclick="selectMainCategory('뷰티')">
+                    뷰티
+                    <svg class="chevron-icon" id="chevron-뷰티" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </button>
+                <button class="category-button" onclick="selectMainCategory('신발')">
+                    신발
+                    <svg class="chevron-icon" id="chevron-신발" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </button>
+                <button class="category-button" onclick="selectMainCategory('가방')">
+                    가방
+                    <svg class="chevron-icon" id="chevron-가방" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </button>
+                <button class="category-button" onclick="selectMainCategory('디지털')">
+                    디지털
+                    <svg class="chevron-icon" id="chevron-디지털" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </button>
+                <button class="category-button" onclick="selectMainCategory('라이프')">
+                    라이프
+                    <svg class="chevron-icon" id="chevron-라이프" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </button>
+                <button class="category-button" onclick="selectMainCategory('스포츠')">
+                    스포츠
+                    <svg class="chevron-icon" id="chevron-스포츠" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </button>
+                <button class="category-button" onclick="selectMainCategory('식품')">
+                    식품
+                    <svg class="chevron-icon" id="chevron-식품" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- 서브 카테고리 -->
+            <div class="sub-categories" id="subCategories">
+                <div class="sub-category-list scrollbar-hide" id="subCategoryList">
+                    <!-- 동적으로 채워짐 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 퀵 필터 -->
+        <div class="quick-filter">
+            <div class="filter-header">
+                <h3 class="filter-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="20" x2="12" y2="10"/>
+                        <line x1="16" y1="20" x2="16" y2="4"/>
+                        <line x1="8" y1="20" x2="8" y2="16"/>
+                    </svg>
+                    인기 쇼핑몰
+                </h3>
+                <button class="filter-toggle" onclick="toggleQuickFilter()">
+                    필터 <span id="filterToggleText">열기</span>
+                </button>
+            </div>
+            
+            <div class="filter-buttons hidden" id="filterButtons">
+                <button class="filter-button" onclick="toggleFilter('신규')">신규</button>
+                <button class="filter-button" onclick="toggleFilter('베스트')">베스트</button>
+                <button class="filter-button" onclick="toggleFilter('할인중')">할인중</button>
+                <button class="filter-button" onclick="toggleFilter('무료배송')">무료배송</button>
+                <button class="filter-button" onclick="toggleFilter('당일발송')">당일발송</button>
+                <button class="filter-button" onclick="toggleFilter('브랜드관')">브랜드관</button>
+            </div>
+        </div>
+
+        <!-- 쇼핑몰 그리드 -->
+        <div class="shops-section">
+            <div class="shops-header">
+                <h3 class="shops-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                    추천 쇼핑몰
+                </h3>
+                <span class="update-time">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    실시간 업데이트
+                </span>
+            </div>
+            
+            <div class="shops-grid" id="shopsGrid">
+                <!-- 동적으로 채워짐 -->
+            </div>
+
+            <!-- 로딩 인디케이터 -->
+            <div class="loading hidden" id="loading">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 카테고리 페이지 -->
+    <div class="page" id="categoryPage">
+        <h2 class="page-title">카테고리</h2>
+        <div id="categoryList">
+            <!-- 동적으로 채워짐 -->
+        </div>
+    </div>
+
+    <!-- 검색 페이지 -->
+    <div class="page" id="searchPage">
+        <div style="position: relative; margin-bottom: 16px;">
+            <input type="text" class="search-page-input" id="searchPageInput" placeholder="쇼핑몰 이름을 검색하세요" onkeypress="handleSearchKeyPress(event)">
+            <svg style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #10b981; cursor: pointer;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" onclick="performSearch()">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="M21 21l-4.35-4.35"/>
+            </svg>
+        </div>
+        
+        <div class="popular-keywords">
+            <h3>인기 검색어</h3>
+            <div class="keyword-buttons">
+                <button class="keyword-button" onclick="searchByKeyword('여성패션')">여성패션</button>
+                <button class="keyword-button" onclick="searchByKeyword('뷰티')">뷰티</button>
+                <button class="keyword-button" onclick="searchByKeyword('명품관')">명품관</button>
+                <button class="keyword-button" onclick="searchByKeyword('스포츠')">스포츠</button>
+                <button class="keyword-button" onclick="searchByKeyword('디지털')">디지털</button>
+            </div>
+        </div>
+        
+        <!-- 검색 결과 섹션 추가 -->
+        <div class="search-results-section" id="searchResultsSection" style="display: none;">
+            <h3 class="search-results-header">검색 결과</h3>
+            <div id="searchResults">
+                <!-- 검색 결과가 여기에 표시됩니다 -->
+            </div>
+        </div>
+        
+        <div>
+            <h3 style="font-weight: bold; margin-bottom: 8px; color: #047857;">최근 방문한 쇼핑몰</h3>
+            <p style="color: #6b7280; font-size: 14px;">최근 방문 기록이 없습니다.</p>
+        </div>
+    </div>
+
+    <!-- 찜 페이지 -->
+    <div class="page" id="wishlistPage">
+        <h2 class="page-title">찜한 쇼핑몰</h2>
+        <div id="wishlistContent">
+            <!-- 동적으로 채워짐 -->
+        </div>
+    </div>
+
+    <!-- 마이페이지 -->
+    <div class="page" id="mypagePage">
+        <h2 class="page-title">마이페이지</h2>
+        
+        <div class="profile-card">
+            <div class="profile-info">
+                <div class="profile-avatar" id="userAvatar">👤</div>
+                <div>
+                    <p class="profile-name" id="userName">PomPom 회원님</p>
+                    <p class="profile-level" id="userEmail">일반회원</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="menu-list">
+            <button class="menu-button primary" onclick="showAddShopPage()">
+                <span class="menu-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    쇼핑몰 등록하기
+                </span>
+                <svg class="chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </button>
+            <button class="menu-button">
+                <span>내가 등록한 쇼핑몰</span>
+                <svg class="chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </button>
+            <button class="menu-button">
+                <span>최근 방문 기록</span>
+                <svg class="chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </button>
+            <button class="menu-button">
+                <span>고객센터</span>
+                <svg class="chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </button>
+            <button class="menu-button logout-button" id="logoutButton" onclick="signOut()" style="display: none;">
+                <span>로그아웃</span>
+                <svg class="chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- 알림 페이지 -->
+    <div class="page" id="notificationsPage">
+        <div class="notification-header">
+            <button class="back-button" onclick="showPage('home')">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+            </button>
+            <h2 style="font-size: 18px; font-weight: bold; color: #047857;">알림</h2>
+        </div>
+
+        <div style="padding: 16px;">
+            <div id="notificationsList">
+                <!-- 동적으로 채워짐 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 쇼핑몰 등록 페이지 -->
+    <div class="page" id="addShopPage">
+        <div class="notification-header" style="background-color: white;">
+            <button class="back-button" onclick="hideAddShopPage()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+            </button>
+            <h2 style="font-size: 18px; font-weight: bold; color: #047857;">쇼핑몰 등록</h2>
+        </div>
+
+        <div style="padding: 16px;">
+            <div class="error-message" id="iframeError" style="display: none;">
+                <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <div class="error-content">
+                    <h4>iframe이 차단되어 있습니다</h4>
+                    <p>이 브라우저에서는 쇼핑몰을 등록할 수 없습니다. 다른 브라우저를 사용하거나 브라우저 설정을 확인해주세요.</p>
+                </div>
+            </div>
+
+            <form id="addShopForm">
+                <div class="form-group">
+                    <label class="form-label">쇼핑몰 이름 *</label>
+                    <input type="text" class="form-input" id="shopName" placeholder="예: 트렌디 패션몰">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">쇼핑몰 URL *</label>
+                    <input type="url" class="form-input" id="shopUrl" placeholder="https://example.com">
+                    <p class="form-help">반드시 https:// 또는 http://로 시작하는 전체 URL을 입력하세요</p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">카테고리 *</label>
+                    <select class="form-select" id="shopCategory">
+                        <option value="의류">의류</option>
+                        <option value="주얼리">주얼리</option>
+                        <option value="뷰티">뷰티</option>
+                        <option value="신발">신발</option>
+                        <option value="가방">가방</option>
+                        <option value="디지털">디지털</option>
+                        <option value="라이프">라이프</option>
+                        <option value="스포츠">스포츠</option>
+                        <option value="식품">식품</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">설명</label>
+                    <textarea class="form-textarea" id="shopDescription" placeholder="쇼핑몰에 대한 간단한 설명을 입력하세요"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">썸네일 URL (선택)</label>
+                    <input type="url" class="form-input" id="shopThumbnail" placeholder="https://example.com/image.jpg">
+                </div>
+
+                <button type="submit" class="submit-button" id="submitButton">쇼핑몰 등록하기</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- iframe 모달 -->
+    <div class="modal" id="iframeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-header-content">
+                    <button class="modal-back-button" onclick="closeModal()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="15 18 9 12 15 6"/>
+                        </svg>
+                    </button>
+                    <div class="modal-title">
+                        <h3 id="modalShopName">쇼핑몰 이름</h3>
+                        <p class="modal-url" id="modalShopUrl">URL</p>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <iframe class="modal-iframe" id="modalIframe" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
+                
+                <button class="modal-return-button" onclick="closeModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                    PomPom으로 돌아가기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 맨 위로 가기 버튼 -->
+    <button class="scroll-top" id="scrollTopButton" onclick="scrollToTop()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="18 15 12 9 6 15"/>
+        </svg>
+    </button>
+
+    <!-- 하단 네비게이션 -->
+    <nav class="bottom-nav">
+        <div class="nav-grid">
+            <button class="nav-button active" onclick="showPage('home')">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                <span class="nav-label">홈</span>
+            </button>
+            <button class="nav-button" onclick="showPage('category')">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                </svg>
+                <span class="nav-label">카테고리</span>
+            </button>
+            <button class="nav-button" onclick="showPage('search')">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="M21 21l-4.35-4.35"/>
+                </svg>
+                <span class="nav-label">검색</span>
+            </button>
+            <button class="nav-button" onclick="showPage('wishlist')">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                <span class="nav-label">찜</span>
+                <span class="nav-badge hidden" id="wishlistBadge">0</span>
+            </button>
+            <button class="nav-button" onclick="showPage('mypage')">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span class="nav-label">마이</span>
+            </button>
+        </div>
+    </nav>
+
+    <script>
+        // 전역 변수
+        let currentPage = 'home';
+        let selectedMainCategory = '전체';
+        let selectedSubCategory = '';
+        let showSubCategories = false;
+        let selectedFilters = [];
+        let currentAdIndex = 0;
+        let page = 1;
+        let isLoading = false;
+        let likedShops = {};
+        let canUseIframe = true;
+        let currentUser = null;
+        let debugMode = false; // 디버그 모드
+
+        // 카테고리 데이터
+        const mainCategories = {
+            '의류': ['여성의류', '남성의류', '아동의류', '스포츠웨어', '언더웨어', '한복'],
+            '주얼리': ['귀걸이', '목걸이', '반지', '팔찌', '시계', '악세서리'],
+            '뷰티': ['스킨케어', '메이크업', '향수', '헤어', '네일', '바디케어'],
+            '신발': ['운동화', '구두', '샌들', '부츠', '슬리퍼', '아동화'],
+            '가방': ['핸드백', '백팩', '크로스백', '지갑', '여행가방', '에코백'],
+            '디지털': ['스마트폰', '노트북', '태블릿', '웨어러블', '액세서리', '가전'],
+            '라이프': ['가구', '침구', '주방', '인테리어', '문구', '반려동물'],
+            '스포츠': ['운동복', '운동기구', '캠핑', '등산', '수영', '골프'],
+            '식품': ['건강식품', '다이어트', '간식', '음료', '신선식품', '밀키트']
+        };
+
+        // 쇼핑몰 데이터
+        let shops = [
+            {
+                id: 1,
+                name: '트렌디 패션몰',
+                url: 'https://example.com/shop1',
+                category: '의류',
+                subCategory: '여성의류',
+                description: '20-30대 여성을 위한 트렌디한 패션 아이템',
+                thumbnail: 'https://via.placeholder.com/300x200/86EFAC/FFFFFF?text=Trendy+Fashion',
+                likes: 234,
+                views: 1520,
+                isLiked: false,
+                rating: 4.8,
+                isNew: true,
+                tags: ['여성의류', '원피스', '블라우스']
+            },
+            {
+                id: 2,
+                name: '뷰티 올 스토어',
+                url: 'https://example.com/shop2',
+                category: '뷰티',
+                subCategory: '스킨케어',
+                description: '국내외 인기 뷰티 제품을 한곳에서',
+                thumbnail: 'https://via.placeholder.com/300x200/6EE7B7/FFFFFF?text=Beauty+Store',
+                likes: 456,
+                views: 3200,
+                isLiked: false,
+                rating: 4.9,
+                isNew: false,
+                tags: ['스킨케어', '메이크업', 'K뷰티']
+            },
+            {
+                id: 3,
+                name: '스마트 디지털몰',
+                url: 'https://example.com/shop3',
+                category: '디지털',
+                subCategory: '스마트폰',
+                description: '최신 디지털 기기와 액세서리 전문',
+                thumbnail: 'https://via.placeholder.com/300x200/A7F3D0/FFFFFF?text=Digital+Store',
+                likes: 312,
+                views: 2100,
+                isLiked: true,
+                rating: 4.7,
+                isNew: false,
+                tags: ['스마트폰', '액세서리', '웨어러블']
+            },
+            {
+                id: 4,
+                name: '맨즈 스타일',
+                url: 'https://example.com/shop4',
+                category: '의류',
+                subCategory: '남성의류',
+                description: '모던한 남성 패션의 모든 것',
+                thumbnail: 'https://via.placeholder.com/300x200/D1FAE5/047857?text=Mens+Style',
+                likes: 189,
+                views: 890,
+                isLiked: false,
+                rating: 4.6,
+                isNew: true,
+                tags: ['남성의류', '정장', '캐주얼']
+            }
+        ];
+
+        // 알림 데이터
+        let notifications = [
+            { id: 1, title: '🎉 환영합니다!', content: 'PomPom 가입을 축하드립니다.', date: '방금 전', read: false },
+            { id: 2, title: '🏪 새로운 쇼핑몰', content: '인기 쇼핑몰이 추가되었습니다.', date: '1시간 전', read: false },
+            { id: 3, title: '💰 특별 쿠폰', content: '회원님만을 위한 10% 할인 쿠폰!', date: '3시간 전', read: true }
+        ];
+
+        // 디버그 로그 함수
+        function debugLog(message, data = null) {
+            if (debugMode) {
+                console.log(`[PomPom Debug] ${message}`, data);
+                const debugInfo = document.getElementById('debugInfo');
+                if (debugInfo) {
+                    debugInfo.innerHTML = `${new Date().toLocaleTimeString()}: ${message}`;
+                    if (data) {
+                        debugInfo.innerHTML += `<br>${JSON.stringify(data, null, 2)}`;
+                    }
+                    debugInfo.classList.add('show');
+                    setTimeout(() => debugInfo.classList.remove('show'), 3000);
+                }
+            }
+        }
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            debugLog('페이지 로드 완료');
+            
+            // URL 파라미터로 디버그 모드 활성화
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('debug') === 'true') {
+                debugMode = true;
+            }
+            
+            // Google Sign-In 초기화
+            initializeGoogleSignIn();
+            
+            checkIframeSupport();
+            checkLoginStatus();
+            renderShops();
+            updateWishlistBadge();
+            startAdSlider();
+            updateNotificationDot();
+            renderNotifications();
+            renderCategories();
+            
+            // 스크롤 이벤트
+            window.addEventListener('scroll', handleScroll);
+            
+            // 폼 제출 이벤트
+            document.getElementById('addShopForm').addEventListener('submit', handleAddShop);
+        });
+
+        // Google Sign-In 초기화
+        function initializeGoogleSignIn() {
+            debugLog('Google Sign-In 초기화 시작');
+            
+            // Google 라이브러리가 로드되었는지 확인
+            if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
+                debugLog('Google 라이브러리가 아직 로드되지 않음');
+                // 라이브러리 로드 재시도
+                setTimeout(initializeGoogleSignIn, 1000);
+                return;
+            }
+            
+            try {
+                google.accounts.id.initialize({
+                    client_id: '382989724031-1koco239agq35vcv7gfj8crr2kth8hin.apps.googleusercontent.com',
+                    callback: handleCredentialResponse,
+                    auto_select: false,
+                    cancel_on_tap_outside: true
+                });
+                
+                debugLog('Google Sign-In 초기화 완료');
+                
+                // 로그인 렌더 버튼 (One Tap UI 대신 사용)
+                const loginSection = document.getElementById('loginSection');
+                if (loginSection && !currentUser) {
+                    // 기존 구글 로그인 버튼에 추가로 렌더 버튼 생성
+                    const buttonDiv = document.createElement('div');
+                    buttonDiv.id = 'g_id_signin';
+                    buttonDiv.className = 'g_id_signin';
+                    buttonDiv.setAttribute('data-type', 'standard');
+                    buttonDiv.setAttribute('data-size', 'large');
+                    buttonDiv.setAttribute('data-theme', 'outline');
+                    buttonDiv.setAttribute('data-text', 'continue_with');
+                    buttonDiv.setAttribute('data-shape', 'pill');
+                    buttonDiv.setAttribute('data-logo_alignment', 'center');
+                    buttonDiv.style.marginTop = '16px';
+                    
+                    // 기존 버튼 숨기기
+                    const oldButton = loginSection.querySelector('.google-login-button');
+                    if (oldButton) {
+                        oldButton.style.display = 'none';
+                    }
+                    
+                    loginSection.appendChild(buttonDiv);
+                    
+                    // 렌더 버튼
+                    google.accounts.id.renderButton(
+                        document.getElementById('g_id_signin'),
+                        { theme: 'outline', size: 'large' }
+                    );
+                }
+                
+            } catch (error) {
+                debugLog('Google Sign-In 초기화 오류', error);
+                showGoogleLoginError('구글 로그인 초기화 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 구글 로그인 상태 확인
+        function checkLoginStatus() {
+            const savedUser = localStorage.getItem('googleUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                updateUIForLoggedInUser();
+            } else {
+                updateUIForLoggedOutUser();
+            }
+        }
+
+        // 구글 로그인 콜백 함수
+        function handleCredentialResponse(response) {
+            debugLog('구글 로그인 응답 받음');
+            
+            try {
+                // JWT 토큰 디코딩
+                const responsePayload = decodeJwtResponse(response.credential);
+                
+                currentUser = {
+                    id: responsePayload.sub,
+                    name: responsePayload.name,
+                    email: responsePayload.email,
+                    picture: responsePayload.picture
+                };
+                
+                debugLog('사용자 정보', currentUser);
+                
+                // 로컬 스토리지에 저장
+                localStorage.setItem('googleUser', JSON.stringify(currentUser));
+                
+                // UI 업데이트
+                updateUIForLoggedInUser();
+                
+                // 환영 알림 추가
+                notifications.unshift({
+                    id: Date.now(),
+                    title: `🎊 ${currentUser.name}님, 환영합니다!`,
+                    content: '구글 계정으로 로그인되었습니다.',
+                    date: '방금 전',
+                    read: false
+                });
+                
+                renderNotifications();
+                updateNotificationDot();
+                
+                // 에러 메시지 숨기기
+                hideGoogleLoginError();
+                
+            } catch (error) {
+                debugLog('로그인 처리 오류', error);
+                showGoogleLoginError('로그인 처리 중 오류가 발생했습니다.');
+            }
+        }
+
+        // JWT 토큰 디코딩 함수
+        function decodeJwtResponse(token) {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            
+            return JSON.parse(jsonPayload);
+        }
+
+        // 구글 로그인 버튼 클릭
+        function signInWithGoogle() {
+            debugLog('구글 로그인 버튼 클릭');
+            
+            if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
+                showGoogleLoginError('구글 로그인이 준비되지 않았습니다. 페이지를 새로고침해주세요.');
+                return;
+            }
+            
+            try {
+                // One Tap UI 대신 OAuth 플로우 시작
+                google.accounts.id.prompt((notification) => {
+                    debugLog('One Tap 프롬프트 상태', notification);
+                    
+                    if (notification.isNotDisplayed()) {
+                        debugLog('One Tap이 표시되지 않음', notification.getNotDisplayedReason());
+                        
+                        // One Tap이 실패하면 팝업 로그인 시도
+                        const client = google.accounts.oauth2.initTokenClient({
+                            client_id: '382989724031-1koco239agq35vcv7gfj8crr2kth8hin.apps.googleusercontent.com',
+                            scope: 'email profile',
+                            callback: (response) => {
+                                debugLog('OAuth 응답', response);
+                                // OAuth 토큰을 받았을 때 처리
+                                if (response.access_token) {
+                                    // 사용자 정보 가져오기
+                                    fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+                                        headers: {
+                                            'Authorization': `Bearer ${response.access_token}`
+                                        }
+                                    })
+                                    .then(res => res.json())
+                                    .then(userInfo => {
+                                        currentUser = {
+                                            id: userInfo.id,
+                                            name: userInfo.name,
+                                            email: userInfo.email,
+                                            picture: userInfo.picture
+                                        };
+                                        
+                                        localStorage.setItem('googleUser', JSON.stringify(currentUser));
+                                        updateUIForLoggedInUser();
+                                        
+                                        notifications.unshift({
+                                            id: Date.now(),
+                                            title: `🎊 ${currentUser.name}님, 환영합니다!`,
+                                            content: '구글 계정으로 로그인되었습니다.',
+                                            date: '방금 전',
+                                            read: false
+                                        });
+                                        
+                                        renderNotifications();
+                                        updateNotificationDot();
+                                        hideGoogleLoginError();
+                                    })
+                                    .catch(error => {
+                                        debugLog('사용자 정보 가져오기 실패', error);
+                                        showGoogleLoginError('사용자 정보를 가져오는데 실패했습니다.');
+                                    });
+                                }
+                            }
+                        });
+                        
+                        client.requestAccessToken();
+                    }
+                });
+            } catch (error) {
+                debugLog('구글 로그인 오류', error);
+                showGoogleLoginError('구글 로그인 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 구글 로그인 에러 표시
+        function showGoogleLoginError(message) {
+            const errorDiv = document.getElementById('googleLoginError');
+            if (errorDiv) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        // 구글 로그인 에러 숨기기
+        function hideGoogleLoginError() {
+            const errorDiv = document.getElementById('googleLoginError');
+            if (errorDiv) {
+                errorDiv.style.display = 'none';
+            }
+        }
+
+        // 로그아웃
+        function signOut() {
+            currentUser = null;
+            localStorage.removeItem('googleUser');
+            
+            // 구글 로그아웃
+            if (google && google.accounts && google.accounts.id) {
+                google.accounts.id.disableAutoSelect();
+            }
+            
+            // UI 업데이트
+            updateUIForLoggedOutUser();
+            
+            // 찜 목록 초기화
+            likedShops = {};
+            updateWishlistBadge();
+            renderShops();
+            
+            // 알림 추가
+            notifications.unshift({
+                id: Date.now(),
+                title: '👋 로그아웃 되었습니다',
+                content: '다음에 또 만나요!',
+                date: '방금 전',
+                read: false
+            });
+            
+            renderNotifications();
+            updateNotificationDot();
+            
+            // Google Sign-In 재초기화
+            setTimeout(initializeGoogleSignIn, 500);
+        }
+
+        // 로그인 사용자 UI 업데이트
+        function updateUIForLoggedInUser() {
+            // 로그인 섹션 숨기기
+            document.getElementById('loginSection').style.display = 'none';
+            
+            // 프로필 정보 업데이트
+            const userAvatar = document.getElementById('userAvatar');
+            const userName = document.getElementById('userName');
+            const userEmail = document.getElementById('userEmail');
+            
+            if (currentUser.picture) {
+                userAvatar.innerHTML = `<img src="${currentUser.picture}" alt="${currentUser.name}">`;
+            }
+            userName.textContent = currentUser.name;
+            userEmail.textContent = currentUser.email;
+            
+            // 로그아웃 버튼 표시
+            document.getElementById('logoutButton').style.display = 'flex';
+        }
+
+        // 로그아웃 사용자 UI 업데이트
+        function updateUIForLoggedOutUser() {
+            // 로그인 섹션 표시
+            document.getElementById('loginSection').style.display = 'block';
+            
+            // 프로필 정보 초기화
+            document.getElementById('userAvatar').innerHTML = '👤';
+            document.getElementById('userName').textContent = 'PomPom 회원님';
+            document.getElementById('userEmail').textContent = '일반회원';
+            
+            // 로그아웃 버튼 숨기기
+            document.getElementById('logoutButton').style.display = 'none';
+        }
+
+        // iframe 지원 체크
+        function checkIframeSupport() {
+            const testIframe = document.createElement('iframe');
+            testIframe.style.display = 'none';
+            testIframe.src = 'about:blank';
+            
+            try {
+                document.body.appendChild(testIframe);
+                canUseIframe = testIframe.contentWindow !== null;
+                document.body.removeChild(testIframe);
+            } catch (e) {
+                canUseIframe = false;
+            }
+            
+            if (!canUseIframe) {
+                document.getElementById('iframeError').style.display = 'flex';
+                document.getElementById('submitButton').disabled = true;
+                const inputs = document.querySelectorAll('#addShopForm input, #addShopForm textarea, #addShopForm select');
+                inputs.forEach(input => input.disabled = true);
+            }
+        }
+
+        // 스크롤 처리
+        function handleScroll() {
+            const header = document.getElementById('header');
+            const topBanner = document.getElementById('topBanner');
+            const scrollTopButton = document.getElementById('scrollTopButton');
+            
+            if (window.scrollY > 100) {
+                header.classList.add('scrolled');
+                if (currentPage === 'home') {
+                    topBanner.style.display = 'none';
+                }
+            } else {
+                header.classList.remove('scrolled');
+                if (currentPage === 'home') {
+                    topBanner.style.display = 'block';
+                }
+            }
+            
+            if (window.scrollY > 500) {
+                scrollTopButton.classList.add('show');
+            } else {
+                scrollTopButton.classList.remove('show');
+            }
+            
+            // 무한 스크롤
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000) {
+                if (currentPage === 'home' && !isLoading) {
+                    loadMoreShops();
+                }
+            }
+        }
+
+        // 페이지 전환
+        function showPage(pageName) {
+            currentPage = pageName;
+            
+            // 모든 페이지 숨기기
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // 네비게이션 버튼 상태 업데이트
+            document.querySelectorAll('.nav-button').forEach((button, index) => {
+                button.classList.remove('active');
+            });
+            
+            // 선택된 페이지 표시
+            const pageElement = document.getElementById(pageName + 'Page');
+            if (pageElement) {
+                pageElement.classList.add('active');
+            }
+            
+            // 네비게이션 버튼 활성화
+            const navButtons = document.querySelectorAll('.nav-button');
+            const pageIndex = ['home', 'category', 'search', 'wishlist', 'mypage'].indexOf(pageName);
+            if (pageIndex !== -1 && navButtons[pageIndex]) {
+                navButtons[pageIndex].classList.add('active');
+            }
+            
+            // 찜 페이지 렌더링
+            if (pageName === 'wishlist') {
+                renderWishlist();
+            }
+            
+            // 알림 배지 업데이트
+            if (pageName === 'notifications') {
+                markAllNotificationsAsRead();
+            }
+            
+            // 스크롤 맨 위로
+            window.scrollTo(0, 0);
+        }
+
+        // 검색 토글
+        function toggleSearch() {
+            const searchBar = document.getElementById('searchBar');
+            searchBar.classList.toggle('show');
+            
+            if (searchBar.classList.contains('show')) {
+                searchBar.querySelector('input').focus();
+            }
+        }
+
+        // 카테고리 선택
+        function selectMainCategory(category) {
+            if (selectedMainCategory === category && category !== '전체') {
+                showSubCategories = !showSubCategories;
+            } else {
+                selectedMainCategory = category;
+                selectedSubCategory = '';
+                showSubCategories = category !== '전체';
+            }
+            
+            updateCategoryUI();
+            renderShops();
+        }
+
+        // 카테고리 UI 업데이트
+        function updateCategoryUI() {
+            // 카테고리 버튼 상태
+            document.querySelectorAll('.category-button').forEach(button => {
+                button.classList.remove('active');
+                if (button.textContent.trim().split('\n')[0] === selectedMainCategory) {
+                    button.classList.add('active');
+                }
+            });
+            
+            // 서브 카테고리 표시
+            const subCategoriesEl = document.getElementById('subCategories');
+            if (showSubCategories && selectedMainCategory !== '전체') {
+                subCategoriesEl.classList.add('show');
+                renderSubCategories();
+            } else {
+                subCategoriesEl.classList.remove('show');
+            }
+            
+            // 화살표 아이콘 회전
+            document.querySelectorAll('.chevron-icon').forEach(icon => {
+                icon.classList.remove('rotated');
+            });
+            if (showSubCategories && selectedMainCategory !== '전체') {
+                const chevron = document.getElementById(`chevron-${selectedMainCategory}`);
+                if (chevron) chevron.classList.add('rotated');
+            }
+        }
+
+        // 서브 카테고리 렌더링
+        function renderSubCategories() {
+            const subCategoryList = document.getElementById('subCategoryList');
+            subCategoryList.innerHTML = `
+                <button class="sub-category-button ${selectedSubCategory === '' ? 'active' : ''}" onclick="selectSubCategory('')">전체</button>
+                ${mainCategories[selectedMainCategory].map(sub => `
+                    <button class="sub-category-button ${selectedSubCategory === sub ? 'active' : ''}" onclick="selectSubCategory('${sub}')">${sub}</button>
+                `).join('')}
+            `;
+        }
+
+        // 서브 카테고리 선택
+        function selectSubCategory(subCategory) {
+            selectedSubCategory = subCategory;
+            updateCategoryUI();
+            renderShops();
+        }
+
+        // 퀵 필터 토글
+        function toggleQuickFilter() {
+            const filterButtons = document.getElementById('filterButtons');
+            const filterToggleText = document.getElementById('filterToggleText');
+            
+            filterButtons.classList.toggle('hidden');
+            filterToggleText.textContent = filterButtons.classList.contains('hidden') ? '열기' : '닫기';
+        }
+
+        // 필터 토글
+        function toggleFilter(filter) {
+            const index = selectedFilters.indexOf(filter);
+            if (index > -1) {
+                selectedFilters.splice(index, 1);
+            } else {
+                selectedFilters.push(filter);
+            }
+            
+            // 필터 버튼 UI 업데이트
+            document.querySelectorAll('.filter-button').forEach(button => {
+                if (button.textContent === filter) {
+                    button.classList.toggle('active');
+                }
+            });
+            
+            renderShops();
+        }
+
+        // 쇼핑몰 렌더링
+        function renderShops() {
+            const shopsGrid = document.getElementById('shopsGrid');
+            
+            // 필터링
+            let filteredShops = shops.filter(shop => {
+                if (selectedMainCategory !== '전체' && shop.category !== selectedMainCategory) {
+                    return false;
+                }
+                if (selectedSubCategory && shop.subCategory !== selectedSubCategory) {
+                    return false;
+                }
+                return true;
+            });
+            
+            // 쇼핑몰 카드 생성
+            shopsGrid.innerHTML = filteredShops.map(shop => `
+                <div class="shop-card" onclick="openShop(${shop.id})">
+                    <div class="shop-image-container">
+                        <img src="${shop.thumbnail}" alt="${shop.name}" class="shop-image">
+                        
+                        <div class="shop-labels">
+                            ${shop.isNew ? '<div class="label-new">NEW</div>' : ''}
+                            <div class="label-category">${shop.category}</div>
+                        </div>
+                        
+                        <button class="like-button" onclick="event.stopPropagation(); toggleLike(${shop.id})">
+                            <svg class="heart-icon ${likedShops[shop.id] ? 'liked' : ''}" viewBox="0 0 24 24" fill="${likedShops[shop.id] ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                        </button>
+                        
+                        <div class="external-link-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                                <polyline points="15 3 21 3 21 9"/>
+                                <line x1="10" y1="14" x2="21" y2="3"/>
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <div class="shop-info">
+                        <p class="shop-name">${shop.name}</p>
+                        <p class="shop-description">${shop.description}</p>
+                        
+                        <div class="shop-stats">
+                            <div class="shop-rating">
+                                <svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                </svg>
+                                <span>${shop.rating || '0.0'}</span>
+                            </div>
+                            <span>|</span>
+                            <span>조회 ${shop.views}</span>
+                            <span>|</span>
+                            <span>♥ ${shop.likes}</span>
+                        </div>
+                        
+                        ${shop.tags && shop.tags.length > 0 ? `
+                            <div class="shop-tags">
+                                ${shop.tags.slice(0, 3).map(tag => `<span class="shop-tag">#${tag}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 좋아요 토글
+        function toggleLike(shopId) {
+            if (!currentUser) {
+                alert('로그인이 필요한 기능입니다.');
+                signInWithGoogle();
+                return;
+            }
+            
+            likedShops[shopId] = !likedShops[shopId];
+            
+            // 쇼핑몰 데이터 업데이트
+            const shop = shops.find(s => s.id === shopId);
+            if (shop) {
+                if (likedShops[shopId]) {
+                    shop.likes++;
+                } else {
+                    shop.likes--;
+                }
+            }
+            
+            renderShops();
+            updateWishlistBadge();
+        }
+
+        // 찜 배지 업데이트
+        function updateWishlistBadge() {
+            const badge = document.getElementById('wishlistBadge');
+            const count = Object.values(likedShops).filter(liked => liked).length;
+            
+            if (count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        // 찜 목록 렌더링
+        function renderWishlist() {
+            const wishlistContent = document.getElementById('wishlistContent');
+            const likedShopsList = shops.filter(shop => likedShops[shop.id]);
+            
+            if (!currentUser) {
+                wishlistContent.innerHTML = `
+                    <div class="empty-state">
+                        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                        <p class="empty-text">로그인 후 이용해주세요.</p>
+                        <button class="primary-button" onclick="signInWithGoogle()">구글로 로그인</button>
+                    </div>
+                `;
+            } else if (likedShopsList.length > 0) {
+                wishlistContent.innerHTML = `
+                    <div class="shops-grid">
+                        ${likedShopsList.map(shop => `
+                            <div class="shop-card" onclick="openShop(${shop.id})">
+                                <div class="shop-image-container">
+                                    <img src="${shop.thumbnail}" alt="${shop.name}" class="shop-image">
+                                    <button class="like-button" onclick="event.stopPropagation(); toggleLike(${shop.id})">
+                                        <svg class="heart-icon liked" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+                                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="shop-info">
+                                    <p class="shop-name">${shop.name}</p>
+                                    <p style="font-size: 14px; color: #10b981; margin-top: 4px;">${shop.category}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                wishlistContent.innerHTML = `
+                    <div class="empty-state">
+                        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                        <p class="empty-text">찜한 쇼핑몰이 없습니다.</p>
+                        <button class="primary-button" onclick="showPage('home')">쇼핑몰 둘러보기</button>
+                    </div>
+                `;
+            }
+        }
+
+        // 더 많은 쇼핑몰 로드
+        function loadMoreShops() {
+            isLoading = true;
+            document.getElementById('loading').classList.remove('hidden');
+            
+            setTimeout(() => {
+                const colors = ['#86EFAC', '#6EE7B7', '#A7F3D0', '#D1FAE5', '#ECFDF5', '#D1FAE5'];
+                const categories = Object.keys(mainCategories);
+                
+                const newShops = Array.from({ length: 6 }, (_, index) => ({
+                    id: Date.now() + index,
+                    name: `새로운 쇼핑몰 ${page + 1}-${index + 1}`,
+                    url: `https://example.com/shop${Date.now() + index}`,
+                    category: categories[Math.floor(Math.random() * categories.length)],
+                    subCategory: '',
+                    description: '새로 추가된 인기 쇼핑몰입니다.',
+                    thumbnail: `https://via.placeholder.com/300x200/${colors[index % colors.length].substring(1)}/047857?text=Shop`,
+                    likes: Math.floor(Math.random() * 500),
+                    views: Math.floor(Math.random() * 5000),
+                    isLiked: false,
+                    rating: (Math.random() * 2 + 3).toFixed(1),
+                    isNew: Math.random() > 0.5,
+                    tags: ['신규', '인기']
+                }));
+                
+                shops = [...shops, ...newShops];
+                page++;
+                isLoading = false;
+                
+                document.getElementById('loading').classList.add('hidden');
+                renderShops();
+            }, 1000);
+        }
+
+        // 광고 슬라이더
+        function startAdSlider() {
+            setInterval(() => {
+                currentAdIndex = (currentAdIndex + 1) % 3;
+                updateAdSlider();
+            }, 5000);
+        }
+
+        // 광고 인덱스 설정
+        function setAdIndex(index) {
+            currentAdIndex = index;
+            updateAdSlider();
+        }
+
+        // 광고 슬라이더 업데이트
+        function updateAdSlider() {
+            const adContainer = document.getElementById('adContainer');
+            adContainer.style.transform = `translateX(-${currentAdIndex * 100}%)`;
+            
+            // 인디케이터 업데이트
+            document.querySelectorAll('.ad-indicator').forEach((indicator, index) => {
+                indicator.classList.toggle('active', index === currentAdIndex);
+            });
+        }
+
+        // 쇼핑몰 열기
+        function openShop(shopId) {
+            if (!canUseIframe) {
+                alert('이 브라우저에서는 iframe이 차단되어 있어 쇼핑몰을 열 수 없습니다.');
+                return;
+            }
+            
+            const shop = shops.find(s => s.id === shopId);
+            if (!shop) return;
+            
+            document.getElementById('modalShopName').textContent = shop.name;
+            document.getElementById('modalShopUrl').textContent = shop.url;
+            document.getElementById('modalIframe').src = shop.url;
+            document.getElementById('iframeModal').classList.add('show');
+        }
+
+        // 모달 닫기
+        function closeModal() {
+            document.getElementById('iframeModal').classList.remove('show');
+            document.getElementById('modalIframe').src = '';
+        }
+
+        // 쇼핑몰 등록 페이지 표시
+        function showAddShopPage() {
+            if (!currentUser) {
+                alert('로그인이 필요한 기능입니다.');
+                signInWithGoogle();
+                return;
+            }
+            
+            document.getElementById('addShopPage').classList.add('active');
+            document.querySelectorAll('.page').forEach(page => {
+                if (page.id !== 'addShopPage') {
+                    page.classList.remove('active');
+                }
+            });
+        }
+
+        // 쇼핑몰 등록 페이지 숨기기
+        function hideAddShopPage() {
+            document.getElementById('addShopPage').classList.remove('active');
+            showPage(currentPage === 'addShop' ? 'home' : currentPage);
+        }
+
+        // 쇼핑몰 등록 처리
+        function handleAddShop(e) {
+            e.preventDefault();
+            
+            if (!canUseIframe) {
+                alert('iframe이 차단되어 있어 쇼핑몰을 등록할 수 없습니다.');
+                return;
+            }
+            
+            const name = document.getElementById('shopName').value;
+            const url = document.getElementById('shopUrl').value;
+            const category = document.getElementById('shopCategory').value;
+            const description = document.getElementById('shopDescription').value;
+            const thumbnail = document.getElementById('shopThumbnail').value;
+            
+            if (!name || !url) {
+                alert('쇼핑몰 이름과 URL을 입력해주세요.');
+                return;
+            }
+            
+            // URL 유효성 검사
+            try {
+                new URL(url);
+            } catch (e) {
+                alert('올바른 URL을 입력해주세요.');
+                return;
+            }
+            
+            const newShop = {
+                id: Date.now(),
+                name,
+                url,
+                category,
+                description,
+                thumbnail: thumbnail || `https://via.placeholder.com/300x200/86EFAC/FFFFFF?text=${encodeURIComponent(name)}`,
+                likes: 0,
+                views: 0,
+                isLiked: false,
+                rating: 0,
+                isNew: true,
+                tags: [],
+                addedBy: currentUser.email
+            };
+            
+            shops.unshift(newShop);
+            renderShops();
+            
+            // 폼 초기화
+            document.getElementById('addShopForm').reset();
+            hideAddShopPage();
+            showPage('home');
+            
+            alert('쇼핑몰이 성공적으로 등록되었습니다!');
+        }
+
+        // 알림 도트 업데이트
+        function updateNotificationDot() {
+            const dot = document.getElementById('notificationDot');
+            const unreadCount = notifications.filter(n => !n.read).length;
+            
+            if (unreadCount > 0) {
+                dot.style.display = 'block';
+            } else {
+                dot.style.display = 'none';
+            }
+        }
+
+        // 알림 렌더링
+        function renderNotifications() {
+            const notificationsList = document.getElementById('notificationsList');
+            
+            notificationsList.innerHTML = notifications.map(notif => `
+                <div class="notification-item ${!notif.read ? 'unread' : ''}" onclick="markNotificationAsRead(${notif.id})">
+                    <div class="notification-content">
+                        <div class="notification-text">
+                            <h3>${notif.title}</h3>
+                            <p>${notif.content}</p>
+                            <p class="notification-date">${notif.date}</p>
+                        </div>
+                        ${!notif.read ? '<div class="unread-dot"></div>' : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 알림 읽음 처리
+        function markNotificationAsRead(id) {
+            const notif = notifications.find(n => n.id === id);
+            if (notif) {
+                notif.read = true;
+                renderNotifications();
+                updateNotificationDot();
+            }
+        }
+
+        // 모든 알림 읽음 처리
+        function markAllNotificationsAsRead() {
+            notifications.forEach(notif => notif.read = true);
+            renderNotifications();
+            updateNotificationDot();
+        }
+
+        // 카테고리 페이지 렌더링
+        function renderCategories() {
+            const categoryList = document.getElementById('categoryList');
+            
+            categoryList.innerHTML = Object.keys(mainCategories).map(category => `
+                <div class="category-item">
+                    <h3>${category}</h3>
+                    <div class="category-grid">
+                        ${mainCategories[category].map(sub => `
+                            <button class="category-sub-button" onclick="selectCategoryAndGoHome('${category}', '${sub}')">${sub}</button>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 카테고리 선택 후 홈으로 이동
+        function selectCategoryAndGoHome(category, subCategory) {
+            selectedMainCategory = category;
+            selectedSubCategory = subCategory;
+            showSubCategories = true;
+            showPage('home');
+            updateCategoryUI();
+            renderShops();
+        }
+
+        // 스크롤 맨 위로
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ========== 검색 기능 추가 시작 ==========
+        
+        // PHP API를 호출하여 상품 검색
+        async function searchProducts(keyword) {
+            if (!keyword || keyword.trim() === '') {
+                return;
+            }
+
+            // 검색 결과 섹션 표시
+            const searchResultsSection = document.getElementById('searchResultsSection');
+            const searchResults = document.getElementById('searchResults');
+            searchResultsSection.style.display = 'block';
+            
+            // 로딩 상태 표시
+            searchResults.innerHTML = '<div class="search-loading"><div class="spinner"></div></div>';
+            
+            try {
+                // PHP API 호출 - 실제 경로로 수정 필요
+                const response = await fetch(`/wp-content/themes/your-theme/pompom-api/search.php?keyword=${encodeURIComponent(keyword)}`);
+                const result = await response.json();
+                
+                if (result.success && result.data.length > 0) {
+                    // 검색 결과 표시
+                    displaySearchResults(result.data);
+                } else {
+                    // 검색 결과 없음
+                    searchResults.innerHTML = '<div class="no-results">검색 결과가 없습니다.</div>';
+                }
+            } catch (error) {
+                console.error('검색 오류:', error);
+                // 에러 발생시 로컬 데이터에서 검색 (백업)
+                searchInLocalData(keyword);
+            }
+        }
+
+        // 검색 결과 표시
+        function displaySearchResults(products) {
+            const searchResults = document.getElementById('searchResults');
+            
+            searchResults.innerHTML = `
+                <div class="shops-grid">
+                    ${products.map((product, index) => `
+                        <div class="shop-card" onclick="openProductLink('${product.product_link}')">
+                            <div class="shop-image-container">
+                                <img src="${product.product_image || 'https://via.placeholder.com/300x200/86EFAC/FFFFFF?text=No+Image'}" 
+                                     alt="${product.product_name}" 
+                                     class="shop-image"
+                                     onerror="this.src='https://via.placeholder.com/300x200/86EFAC/FFFFFF?text=No+Image'">
+                                
+                                <div class="shop-labels">
+                                    <div class="label-category">${product.category || '미분류'}</div>
+                                </div>
+                                
+                                <div class="external-link-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                                        <polyline points="15 3 21 3 21 9"/>
+                                        <line x1="10" y1="14" x2="21" y2="3"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            
+                            <div class="shop-info">
+                                <p class="shop-name">${product.product_name}</p>
+                                <p class="shop-description">${product.shop_name || ''}</p>
+                                
+                                ${product.price ? `
+                                    <div class="shop-stats">
+                                        <span style="color: #10b981; font-weight: bold;">${product.price}원</span>
+                                    </div>
+                                ` : ''}
+                                
+                                ${product.tags ? `
+                                    <div class="shop-tags">
+                                        ${product.tags.split(',').slice(0, 3).map(tag => `<span class="shop-tag">#${tag.trim()}</span>`).join('')}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // 로컬 데이터에서 검색 (백업용)
+        function searchInLocalData(keyword) {
+            const searchResults = document.getElementById('searchResults');
+            const lowerKeyword = keyword.toLowerCase();
+            
+            // 기존 쇼핑몰 데이터에서 검색
+            const filteredShops = shops.filter(shop => 
+                shop.name.toLowerCase().includes(lowerKeyword) ||
+                shop.description.toLowerCase().includes(lowerKeyword) ||
+                shop.category.toLowerCase().includes(lowerKeyword) ||
+                (shop.tags && shop.tags.some(tag => tag.toLowerCase().includes(lowerKeyword)))
+            );
+            
+            if (filteredShops.length > 0) {
+                searchResults.innerHTML = `
+                    <div class="shops-grid">
+                        ${filteredShops.map(shop => `
+                            <div class="shop-card" onclick="openShop(${shop.id})">
+                                <div class="shop-image-container">
+                                    <img src="${shop.thumbnail}" alt="${shop.name}" class="shop-image">
+                                    
+                                    <div class="shop-labels">
+                                        ${shop.isNew ? '<div class="label-new">NEW</div>' : ''}
+                                        <div class="label-category">${shop.category}</div>
+                                    </div>
+                                    
+                                    <button class="like-button" onclick="event.stopPropagation(); toggleLike(${shop.id})">
+                                        <svg class="heart-icon ${likedShops[shop.id] ? 'liked' : ''}" viewBox="0 0 24 24" fill="${likedShops[shop.id] ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                        </svg>
+                                    </button>
+                                    
+                                    <div class="external-link-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                                            <polyline points="15 3 21 3 21 9"/>
+                                            <line x1="10" y1="14" x2="21" y2="3"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                
+                                <div class="shop-info">
+                                    <p class="shop-name">${shop.name}</p>
+                                    <p class="shop-description">${shop.description}</p>
+                                    
+                                    <div class="shop-stats">
+                                        <div class="shop-rating">
+                                            <svg class="star-icon" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+                                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                            </svg>
+                                            <span>${shop.rating || '0.0'}</span>
+                                        </div>
+                                        <span>|</span>
+                                        <span>조회 ${shop.views}</span>
+                                        <span>|</span>
+                                        <span>♥ ${shop.likes}</span>
+                                    </div>
+                                    
+                                    ${shop.tags && shop.tags.length > 0 ? `
+                                        <div class="shop-tags">
+                                            ${shop.tags.slice(0, 3).map(tag => `<span class="shop-tag">#${tag}</span>`).join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                searchResults.innerHTML = '<div class="no-results">검색 결과가 없습니다.</div>';
+            }
+        }
+
+        // 상품 링크 열기
+        function openProductLink(link) {
+            if (link) {
+                window.open(link, '_blank');
+            }
+        }
+
+        // 검색 페이지에서 검색 실행
+        function performSearch() {
+            const input = document.getElementById('searchPageInput');
+            const keyword = input.value.trim();
+            if (keyword) {
+                searchProducts(keyword);
+            }
+        }
+
+        // 헤더 검색바에서 검색 실행
+        function performHeaderSearch() {
+            const input = document.getElementById('headerSearchInput');
+            const keyword = input.value.trim();
+            if (keyword) {
+                // 검색 페이지로 이동
+                showPage('search');
+                // 검색 입력값 복사
+                document.getElementById('searchPageInput').value = keyword;
+                // 검색 실행
+                searchProducts(keyword);
+                // 헤더 검색바 닫기
+                document.getElementById('searchBar').classList.remove('show');
+            }
+        }
+
+        // 키워드로 검색 (인기 검색어 클릭시)
+        function searchByKeyword(keyword) {
+            document.getElementById('searchPageInput').value = keyword;
+            searchProducts(keyword);
+        }
+
+        // 엔터키 처리 - 검색 페이지
+        function handleSearchKeyPress(event) {
+            if (event.key === 'Enter') {
+                performSearch();
+            }
+        }
+
+        // 엔터키 처리 - 헤더 검색바
+        function handleHeaderSearchKeyPress(event) {
+            if (event.key === 'Enter') {
+                performHeaderSearch();
+            }
+        }
+
+        // ========== 검색 기능 추가 끝 ==========
+    </script>
+</body>
+</html>
